@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "app-chart.name" . }}
   labels:
-    app: web-app
+    {{ include "app-chart.selectorLabels" . | nindent 4}}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -23,6 +23,10 @@ spec:
             containerPort: {{ .Values.service.port }}
             protocol: TCP
         env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         {{- range $envItem := .Values.configMapList }}
         - name: {{ $envItem.envName }}
           valueFrom:
