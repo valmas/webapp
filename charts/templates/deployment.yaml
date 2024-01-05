@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app-chart.name" . }}
+  labels:
+    app: web-app
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{ include "app-chart.selectorLabels" . | nindent 6}}
+  template:
+    metadata:
+      labels:
+        {{ include "app-chart.selectorLabels" . | nindent 8}}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Chart.Name }}:{{ .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+          {{- range $envItem := .Values.configMapList }}
+          - name: {{ $envItem.envName }}
+            valueFrom:
+              configMapKeyRef:
+                key: {{ $envItem.envKey }}
+                name: web-app-cm
+          {{- end}}
+          {{- range $secretItem := .Values.secretKeyList }}
+          {{- range $envItem := $secretItem.env}}
+          - name: {{ $envItem.envName }}
+            valueFrom:
+              secretKeyRef:
+                key: {{ $envItem.envKey }}
+                name: {{ $secretItem.secretKeyName }}
+          {{- end }}
+          {{- end }}

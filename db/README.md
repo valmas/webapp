@@ -1,0 +1,1 @@
+helm install my-postgresql bitnami/postgresql -f values.yaml
