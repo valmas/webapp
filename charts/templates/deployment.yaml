@@ -15,27 +15,39 @@ spec:
         {{ include "app-chart.selectorLabels" . | nindent 8}}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
-          image: {{ .Chart.Name }}:{{ .Chart.AppVersion }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          env:
-          {{- range $envItem := .Values.configMapList }}
-          - name: {{ $envItem.envName }}
-            valueFrom:
-              configMapKeyRef:
-                key: {{ $envItem.envKey }}
-                name: web-app-cm
-          {{- end}}
-          {{- range $secretItem := .Values.secretKeyList }}
-          {{- range $envItem := $secretItem.env}}
-          - name: {{ $envItem.envName }}
-            valueFrom:
-              secretKeyRef:
-                key: {{ $envItem.envKey }}
-                name: {{ $secretItem.secretKeyName }}
-          {{- end }}
-          {{- end }}
+      - name: {{ .Chart.Name }}
+        image: {{ .Chart.Name }}:{{ .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        ports:
+          - name: http
+            containerPort: {{ .Values.service.port }}
+            protocol: TCP
+        env:
+        {{- range $envItem := .Values.configMapList }}
+        - name: {{ $envItem.envName }}
+          valueFrom:
+            configMapKeyRef:
+              key: {{ $envItem.envKey }}
+              name: web-app-cm
+        {{- end}}
+        {{- range $secretItem := .Values.secretKeyList }}
+        {{- range $envItem := $secretItem.env}}
+        - name: {{ $envItem.envName }}
+          valueFrom:
+            secretKeyRef:
+              key: {{ $envItem.envKey }}
+              name: {{ $secretItem.secretKeyName }}
+        {{- end }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 3
