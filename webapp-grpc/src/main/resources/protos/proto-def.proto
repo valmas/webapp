@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package com.spboot.webapp.proto;
+
+option java_multiple_files = true;
+option java_package = "com.spboot.webapp.proto";
+
+service PersonService {
+  rpc AddPerson (AddPersonRequest) returns (AddPersonResponse);
+  rpc FindPerson (FindPersonRequest) returns (FindPersonResponse);
+  rpc MakeFriend (MakeFriendRequest) returns (google.protobuf.Empty);
+}
+
+message AddPersonRequest {
+  Person person = 1;
+}
+
+message AddPersonResponse {
+  int64 id = 1;
+}
+
+message FindPersonRequest {
+  int64 id = 1;
+}
+
+message FindPersonResponse {
+  Person person = 1;
+}
+
+message MakeFriendRequest {
+  int64 id1 = 1;
+  int64 id2 = 2;
+}
+
+message Person {
+  string name = 1;
+  int32 age = 2;
+}

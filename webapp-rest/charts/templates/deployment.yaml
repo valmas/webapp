@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app-chart.name" . }}
+  labels:
+    {{ include "app-chart.selectorLabels" . | nindent 4}}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{ include "app-chart.selectorLabels" . | nindent 6}}
+  template:
+    metadata:
+      labels:
+        {{ include "app-chart.selectorLabels" . | nindent 8}}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Chart.Name }}:{{ .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        ports:
+          - name: http
+            containerPort: {{ .Values.service.port }}
+            protocol: TCP
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        {{- range $envItem := .Values.configMapList }}
+        - name: {{ $envItem.envName }}
+          valueFrom:
+            configMapKeyRef:
+              key: {{ $envItem.envKey }}
+              name: {{ include "app-chart.name" $ }}-cm
+        {{- end}}
+        {{- range $secretItem := .Values.secretKeyList }}
+        {{- range $envItem := $secretItem.env}}
+        - name: {{ $envItem.envName }}
+          valueFrom:
+            secretKeyRef:
+              key: {{ $envItem.envKey }}
+              name: {{ $secretItem.secretKeyNamePrefix }}-{{ include "app-chart.name" $ }}
+        {{- end }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 3

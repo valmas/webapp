@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "app-chart.name" . }}-cm
+data:
+  service_port: {{ quote .Values.service.port }}
+  db_host: {{ .Values.db.host }}
+  db_port: {{ quote .Values.db.port }}
+  db_name: {{ .Values.db.name }}

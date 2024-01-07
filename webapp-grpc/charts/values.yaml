@@ -1,0 +1,51 @@
+image:
+  repository:
+  name:
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+replicaCount: 1
+
+service:
+  port: 9090
+  targetPort: 9090
+  type: ClusterIP
+  name: grpc
+
+db:
+  host: my-postgresql.default.svc.cluster.local
+  port: 5432
+  name: db
+  username: postgres
+  password: NrjLBD5d4f
+
+configMapList:
+  - envName: SERVICE_PORT
+    envKey: service_port
+  - envName: DB_HOST
+    envKey: db_host
+  - envName: DB_PORT
+    envKey: db_port
+  - envName: DB_NAME
+    envKey: db_name
+
+secretKeyList:
+  - secretKeyNamePrefix: secret-db
+    env:
+      - envName: DB_USERNAME
+        envKey: username
+      - envName: DB_PASSWORD
+        envKey: password

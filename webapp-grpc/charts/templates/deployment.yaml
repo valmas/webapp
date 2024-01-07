@@ -32,7 +32,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: {{ $envItem.envKey }}
-              name: web-app-cm
+              name: {{ include "app-chart.name" $ }}-cm
         {{- end}}
         {{- range $secretItem := .Values.secretKeyList }}
         {{- range $envItem := $secretItem.env}}
@@ -40,18 +40,16 @@ spec:
           valueFrom:
             secretKeyRef:
               key: {{ $envItem.envKey }}
-              name: {{ $secretItem.secretKeyName }}
+              name: {{ $secretItem.secretKeyNamePrefix }}-{{ include "app-chart.name" $ }}
         {{- end }}
         {{- end }}
         livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
+          grpc:
             port: {{ .Values.service.port }}
           initialDelaySeconds: 5
           periodSeconds: 3
         readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
+          grpc:
             port: {{ .Values.service.port }}
           initialDelaySeconds: 5
           periodSeconds: 3

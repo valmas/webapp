@@ -23,6 +23,7 @@ service:
   port: 8080
   targetPort: 8080
   type: ClusterIP
+  name: http
 
 db:
   host: my-postgresql.default.svc.cluster.local
@@ -42,7 +43,7 @@ configMapList:
     envKey: db_name
 
 secretKeyList:
-  - secretKeyName: secret-db-web-app
+  - secretKeyNamePrefix: secret-db
     env:
       - envName: DB_USERNAME
         envKey: username
